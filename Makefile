@@ -1,10 +1,15 @@
 VERSION = 2
 LIBRARY_NAME = pam_watchid.so
 DESTINATION = /usr/local/lib/pam
-TARGET = x86_64-apple-macosx10.15
 
-all:
-	swiftc watchid-pam-extension.swift -o $(LIBRARY_NAME) -target $(TARGET) -emit-library
+all: pam_watchid_x86_64.o pam_watchid_arm64e.o
+	lipo -create -output $(LIBRARY_NAME) pam_watchid_x86_64.o pam_watchid_arm64e.o
+
+pam_watchid_x86_64.o:
+	swiftc watchid-pam-extension.swift -o $@ -target x86_64-apple-macosx10.15 -emit-library
+
+pam_watchid_arm64e.o:
+	swiftc watchid-pam-extension.swift -o $@ -target arm64e-apple-macosx11 -emit-library
 
 install: all
 	mkdir -p $(DESTINATION)
