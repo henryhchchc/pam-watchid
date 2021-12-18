@@ -7,6 +7,7 @@ private let PAM_AUTH_ERR = CInt(9)
 private let PAM_IGNORE = CInt(25)
 private let PAM_SILENT = CInt(bitPattern: 0x80000000)
 private let DEFAULT_REASON = "perform an action that requires authentication"
+private let SUDO_REASON = "execute a command as root"
 
 public typealias vchar = UnsafePointer<UnsafeMutablePointer<CChar>>
 public typealias pam_handle_t = UnsafeRawPointer?
@@ -21,11 +22,11 @@ public func pam_sm_authenticate(pamh: pam_handle_t, flags: CInt, argc: CInt, arg
     }
 
     let arguments = parseArguments(argc: Int(argc), argv: argv)
-    var reason = arguments["reason"] ?? DEFAULT_REASON
+    var reason = arguments["reason"] ?? SUDO_REASON
     reason = reason.isEmpty ? DEFAULT_REASON : reason
 
     let policy = LAPolicy.deviceOwnerAuthenticationIgnoringUserID
-    
+
     let context = LAContext()
     if !context.canEvaluatePolicy(policy, error: nil) {
         return PAM_IGNORE
